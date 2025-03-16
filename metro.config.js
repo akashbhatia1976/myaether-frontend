@@ -1,11 +1,23 @@
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const path = require('path');
 
-/**
- * Metro configuration
- * https://facebook.github.io/metro/docs/configuration
- *
- * @type {import('metro-config').MetroConfig}
- */
-const config = {};
+const defaultConfig = getDefaultConfig(__dirname);
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+const config = {
+  resolver: {
+    sourceExts: [...defaultConfig.resolver.sourceExts, 'cjs'],
+  },
+  watchFolders: [
+    path.resolve(__dirname, 'node_modules/react-native-reanimated'),
+  ],
+  server: {
+    enhanceMiddleware: (middleware) => {
+      return (req, res, next) => {
+        return middleware(req, res, next);
+      };
+    },
+  },
+};
+
+module.exports = mergeConfig(defaultConfig, config);
+
