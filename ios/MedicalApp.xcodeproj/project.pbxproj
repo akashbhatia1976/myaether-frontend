@@ -32,7 +32,7 @@
 		00E356EE1AD99517003FC87E /* MedicalAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedicalAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* MedicalAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MedicalAppTests.m; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* MedicalApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MedicalApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* MyAether.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyAether.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = MedicalApp/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = MedicalApp/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = MedicalApp/Images.xcassets; sourceTree = "<group>"; };
@@ -138,7 +138,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* MedicalApp.app */,
+				13B07F961A680F5B00A75B9A /* MyAether.app */,
 				00E356EE1AD99517003FC87E /* MedicalAppTests.xctest */,
 			);
 			name = Products;
@@ -196,7 +196,7 @@
 			);
 			name = MedicalApp;
 			productName = MedicalApp;
-			productReference = 13B07F961A680F5B00A75B9A /* MedicalApp.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* MyAether.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -216,7 +216,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "MyAether" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "MedicalApp" */;
 			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -544,6 +544,8 @@
 					"$(SRCROOT)/../node_modules/react-native/Libraries/Required/**",
 				);
 				INFOPLIST_FILE = MedicalApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MyAether;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -604,7 +606,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.akashbhatia1976.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = MedicalApp;
+				PRODUCT_NAME = MyAether;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -695,6 +697,8 @@
 					"$(SRCROOT)/../node_modules/react-native/Libraries/Required/**",
 				);
 				INFOPLIST_FILE = MedicalApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MyAether;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				"INFOPLIST_KEY_UIUserInterfaceStyle[sdk=*]" = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -756,7 +760,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.akashbhatia1976.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = MedicalApp;
+				PRODUCT_NAME = MyAether;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -934,7 +938,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "MyAether" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "MedicalApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
