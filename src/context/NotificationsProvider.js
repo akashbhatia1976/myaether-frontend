@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { View } from "react-native";
 
 export const NotificationContext = createContext();
-const socket = io("http://localhost:3000"); // Backend URL
+const socket = io(process.env.EXPO_PUBLIC_API_BASE_URL); // Backend URL
 
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);

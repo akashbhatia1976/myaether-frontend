@@ -7,9 +7,15 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { checkUserExists, createUser, loginUser, needsPasswordReset, resetPassword } from "../api/apiService";
 import { useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons"; // Make sure this is installed
 
 const LoginRegistrationScreen = () => {
   const [userId, setUserId] = useState("");
@@ -77,13 +83,28 @@ const LoginRegistrationScreen = () => {
     try {
       console.log(`Logging in user: ${userIdToLogin}`);
       const response = await loginUser(userIdToLogin, userPassword);
+
+      // ✅ Save the token and verify it was saved
+      await AsyncStorage.setItem("token", response.token);
+      await AsyncStorage.setItem("userId", response.userId);
+      
+      const savedToken = await AsyncStorage.getItem("token");
+      console.log("🔒 Token saved and verified:", savedToken);
+
+      if (!savedToken) {
+        throw new Error("Token not saved properly");
+      }
+
       Alert.alert("Success", "Login successful!", [
         {
           text: "OK",
-          onPress: () => navigation.navigate("DashboardScreen", {
-            userId: response.userId,
-            healthId: response.healthId
-          }),
+          onPress: () => {
+            console.log("🧭 Navigating to dashboard with:", response.userId);
+            navigation.navigate("DashboardScreen", {
+              userId: response.userId,
+              healthId: response.healthId,
+            });
+          },
         },
       ]);
     } catch (error) {
@@ -124,120 +145,295 @@ const LoginRegistrationScreen = () => {
   };
 
   const handlePasswordReset = async (userIdToReset) => {
-    Alert.prompt(
-      "Reset Password",
-      "Enter your new password:",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Reset",
-          onPress: async (newPassword) => {
-            if (!newPassword || newPassword.length < 6) {
-              Alert.alert("Error", "Password must be at least 6 characters long.");
-              return;
-            }
-
-            setLoading(true);
-            try {
-              console.log(`Resetting password for user: ${userIdToReset}`);
-              await resetPassword(userIdToReset, newPassword);
-              Alert.alert("Success", "Password reset successful. Please log in again.", [{ text: "OK" }]);
-            } catch (error) {
-              console.error("❌ Password reset error:", error);
-              Alert.alert("Error", "Failed to reset password. Please try again.");
-            } finally {
-              setLoading(false);
-            }
+    // Note: Alert.prompt is iOS only. For a cross-platform solution,
+    // you might want to create a custom modal
+    if (Platform.OS === 'ios') {
+      Alert.prompt(
+        "Reset Password",
+        "Enter your new password:",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
           },
-        },
-      ],
-      "secure-text"
-    );
+          {
+            text: "Reset",
+            onPress: async (newPassword) => {
+              if (!newPassword || newPassword.length < 6) {
+                Alert.alert("Error", "Password must be at least 6 characters long.");
+                return;
+              }
+
+              resetPasswordAction(userIdToReset, newPassword);
+            },
+          },
+        ],
+        "secure-text"
+      );
+    } else {
+      // For Android, you would typically show a custom dialog
+      Alert.alert(
+        "Reset Password",
+        "Please use the 'Forgot Password' option to reset your password.",
+        [{ text: "OK" }]
+      );
+    }
+  };
+
+  const resetPasswordAction = async (userId, newPassword) => {
+    setLoading(true);
+    try {
+      console.log(`Resetting password for user: ${userId}`);
+      await resetPassword(userId, newPassword);
+      Alert.alert("Success", "Password reset successful. Please log in again.", [{ text: "OK" }]);
+    } catch (error) {
+      console.error("❌ Password reset error:", error);
+      Alert.alert("Error", "Failed to reset password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Aether Login</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Enter User ID"
-        value={userId}
-        onChangeText={setUserId}
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Email (optional)"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Phone (optional)"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      {loading ? (
-        <ActivityIndicator size="large" color="#6200ee" style={styles.loader} />
-      ) : (
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={handleContinue}
-          disabled={loading || !userId.trim() || !password}
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.loginButtonText}>Continue</Text>
-        </TouchableOpacity>
-      )}
-
-      <TouchableOpacity onPress={() => handlePasswordReset(userId)}>
-        <Text style={styles.forgotPasswordLink}>Forgot Password?</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => handleRegister(userId, email, phone, password)}>
-        <Text style={styles.registerLink}>New user? Register here</Text>
-      </TouchableOpacity>
-    </View>
+          {/* Logo and Header */}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoBox}>
+              <Ionicons name="flash" size={40} color="#fff" />
+            </View>
+            <Text style={styles.appName}>Aether Health</Text>
+            <Text style={styles.appTagline}>Your personal health records manager</Text>
+          </View>
+          
+          {/* Login/Registration Form */}
+          <View style={styles.formContainer}>
+            <View style={styles.formHeader}>
+              <Text style={styles.formTitle}>Welcome Back</Text>
+              <Text style={styles.formSubtitle}>Sign in to access your health records</Text>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>User ID</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your unique ID"
+                value={userId}
+                onChangeText={setUserId}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email (optional)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Phone (optional)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your phone number"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <View style={styles.passwordLabelContainer}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <TouchableOpacity onPress={() => handlePasswordReset(userId)}>
+                  <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+            
+            {loading ? (
+              <ActivityIndicator size="large" color="#0D9488" style={styles.loader} />
+            ) : (
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={handleContinue}
+                disabled={loading || !userId.trim() || !password}
+              >
+                <Ionicons name="log-in-outline" size={20} color="#fff" style={styles.buttonIcon} />
+                <Text style={styles.loginButtonText}>Continue</Text>
+              </TouchableOpacity>
+            )}
+            
+            <View style={styles.registerLinkContainer}>
+              <Text style={styles.registerText}>
+                New user? <Text style={styles.registerLink} onPress={() => handleRegister(userId, email, phone, password)}>Register here</Text>
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#fff" },
-  header: { fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: "#6200ee" },
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: 20,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  logoBox: {
+    width: 64,
+    height: 64,
+    backgroundColor: "#0D9488",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  appName: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 4,
+  },
+  appTagline: {
+    fontSize: 16,
+    color: "#6B7280",
+  },
+  formContainer: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  formHeader: {
+    marginBottom: 24,
+  },
+  formTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 4,
+  },
+  formSubtitle: {
+    fontSize: 16,
+    color: "#6B7280",
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#374151",
+    marginBottom: 6,
+  },
   input: {
-    width: "100%",
-    padding: 12,
+    backgroundColor: "#F9FAFB",
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 6,
-    marginBottom: 10,
-    backgroundColor: "#fff",
+    borderColor: "#D1D5DB",
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 16,
   },
-  loginButton: { backgroundColor: "#6200ee", padding: 12, borderRadius: 6, alignItems: "center", width: "100%" },
-  loginButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  forgotPasswordLink: { marginTop: 15, color: "#6200ee", fontSize: 14, textDecorationLine: "underline" },
-  registerLink: { marginTop: 15, color: "#6200ee", fontSize: 14 },
-  loader: { marginVertical: 20 },
+  passwordLabelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: "#0D9488",
+  },
+  loginButton: {
+    backgroundColor: "#0D9488",
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    marginTop: 10,
+    shadowColor: "#0D9488",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  loginButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  registerLinkContainer: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+  registerText: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  registerLink: {
+    color: "#0D9488",
+    fontWeight: "500",
+  },
+  loader: {
+    marginVertical: 20,
+  },
 });
 
 export default LoginRegistrationScreen;
-

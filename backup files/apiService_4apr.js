@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from "expo-constants";
 
-const BASE_URL = `${Constants?.expoConfig?.extra?.API_BASE_URL}/api`;
+const BASE_URL = `${process.env.EXPO_PUBLIC_API_BASE_URL}/api`;
 console.log("🌐 BASE_URL:", BASE_URL); // should print .../api
 
 

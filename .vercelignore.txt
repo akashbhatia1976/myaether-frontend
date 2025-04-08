@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+dist
+build
+.DS_Store
+.vscode
+.idea
+coverage
+/src/pages/old_screens
+/src/pages/screens 1
